@@ -17,16 +17,14 @@ const app = express();
 const httpServer = http.createServer(app);
 
 const startServer = async () => {
-  connectDatabase(() => console.log("database connected"));
-
   const schema = makeExecutableSchema({
     typeDefs,
-    resolvers,
+    resolvers
   });
 
   const server = new ApolloServer({
     schema,
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })]
   });
   await server.start();
   app.use(
@@ -34,7 +32,7 @@ const startServer = async () => {
     cors(),
     express.json(),
     expressMiddleware(server, {
-      context: async ({ req }) => ({ token: req.headers.token }),
+      context: async ({ req }) => ({ token: req.headers.token })
     })
   );
 
@@ -48,4 +46,7 @@ const startServer = async () => {
   // console.log(`🚀  Server ready at: ${url}`);
 };
 
-startServer();
+connectDatabase(() => {
+  console.log("database connected");
+  startServer();
+});
