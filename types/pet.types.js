@@ -60,15 +60,17 @@ export const PetSchema = gql`
       color: String!
       owner: PetOwner!
     ): CreatePetResponse!
+
     updatePetData(
       id: ID!
-      name: String!
-      species: String!
-      color: String!
+      name: String
+      species: String
+      color: String
       breed: String
-      sheltered: Boolean!
-      owner: PetOwner!
+      sheltered: Boolean
+      owner: ID
     ): UpdatePetDataResponse!
+
     deletePetData(id: ID!): DeletePetDataResponse!
   }
 `;

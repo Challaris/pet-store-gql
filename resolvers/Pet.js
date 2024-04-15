@@ -5,47 +5,48 @@ export const resolvers = {
   Query: {
     getAllPets: async () => {
       try {
-        const pets = await Pet.find({});
+        const pets = await Pet.find({}).populate("owner");
         return {
           status: true,
           message: "Pets fetched successfully!",
-          data: pets,
+          data: pets
         };
       } catch (error) {
         throw "An error ocurred!";
       }
     },
+
     getSinglePet: async (_, props) => {
       try {
         const { id } = props;
-        const singlePet = await Pet.findOne({ _id: id });
+        const singlePet = await Pet.findOne({ _id: id }).populate("owner");
         if (!singlePet) {
           return {
             status: false,
             message: "Pets not found!",
-            data: {},
+            data: {}
           };
         }
         return {
           status: true,
           message: "Pets fetched successfully!",
-          data: singlePet,
+          data: singlePet
         };
       } catch (error) {
         return "An error ocurred!";
       }
-    },
+    }
   },
 
   Mutation: {
     createPet: async (_, props) => {
       try {
         const { name, species, breed, sheltered, color, owner } = props;
-        const nameExists = await Pet.findOne({ name: name });
-        if (nameExists) {
+        const petWithNameExists = await Pet.findOne({ name });
+        if (petWithNameExists) {
           return {
             status: false,
-            message: "Pet already exists!",
+            message: "Pet already exists!"
           };
         }
 
@@ -57,12 +58,12 @@ export const resolvers = {
           breed,
           sheltered,
           color,
-          owner: petOwner,
+          owner: petOwner
         });
 
         return {
           status: true,
-          message: "Pet was created successfully!",
+          message: "Pet was created successfully!"
         };
       } catch (error) {
         console.log("Could not create pet", { error });
@@ -71,25 +72,24 @@ export const resolvers = {
 
     updatePetData: async (_, props) => {
       try {
-        const { id, name, species, breed, sheltered, color, owner } = props;
-        const petOwner = await Owner.findOneAndUpdate(
-          { name: owner.name },
-          { ...owner },
-          { new: true }
-        );
+        console.log(props);
+        const petOwner = await Owner.findOne({ _id: props.owner });
 
-        const pet = await Pet.findOneAndUpdate(
-          { _id: id },
-          { name, species, breed, sheltered, color, owner: petOwner },
-          {
-            new: true,
-          }
-        );
+        if (!petOwner) {
+          return {
+            status: false,
+            message: "Owner Document Not Found!"
+          };
+        }
+
+        const pet = await Pet.findOneAndUpdate({ _id: props.id }, props, {
+          new: true
+        });
 
         return {
           status: true,
           message: "Pet data updated successfully",
-          data: pet,
+          data: pet
         };
       } catch (error) {
         console.log("Could not update pet data", { error });
@@ -98,15 +98,14 @@ export const resolvers = {
 
     deletePetData: async (_, props) => {
       try {
-        const { id } = props;
-        const pet = await Pet.findByIdAndDelete({ _id: id });
+        await Pet.findByIdAndDelete({ _id: props.id });
         return {
           status: true,
-          message: "Pet data deleted!",
+          message: "Pet data deleted!"
         };
       } catch (error) {
         return "Could not delete pet data";
       }
-    },
-  },
+    }
+  }
 };
